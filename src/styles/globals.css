@@ -1,0 +1,124 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 240 10% 4%;
+  --foreground: 0 0% 98%;
+  --card: 240 10% 8%;
+  --card-foreground: 0 0% 98%;
+  --popover: 240 10% 8%;
+  --popover-foreground: 0 0% 98%;
+  --primary: 158 100% 41%;
+  --primary-foreground: 240 10% 4%;
+  --secondary: 195 100% 45%;
+  --secondary-foreground: 0 0% 98%;
+  --muted: 240 10% 12%;
+  --muted-foreground: 240 5% 65%;
+  --accent: 276 66% 46%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 240 10% 15%;
+  --input: 240 10% 15%;
+  --ring: 158 100% 41%;
+  --radius: 0.75rem;
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-qie-dark text-foreground;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-qie-primary to-qie-secondary;
+  }
+  
+  .glass {
+    @apply bg-qie-card/80 backdrop-blur-xl border border-qie-border;
+  }
+  
+  .glow-primary {
+    box-shadow: 0 0 20px rgba(0, 208, 132, 0.3);
+  }
+  
+  .glow-secondary {
+    box-shadow: 0 0 20px rgba(0, 168, 232, 0.3);
+  }
+  
+  .card-hover {
+    @apply transition-all duration-300 hover:border-qie-primary/50 hover:shadow-lg hover:shadow-qie-primary/10;
+  }
+}
+
+/* Score animations */
+@keyframes score-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+.score-animate {
+  animation: score-pulse 2s ease-in-out infinite;
+}
+
+/* Loading shimmer */
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* RainbowKit custom styling */
+[data-rk] {
+  --rk-colors-accentColor: #00D084;
+  --rk-colors-accentColorForeground: #0A0A0F;
+  --rk-colors-modalBackground: #111118;
+  --rk-colors-modalText: #ffffff;
+  --rk-colors-modalTextSecondary: #9CA3AF;
+  --rk-colors-profileForeground: #111118;
+  --rk-colors-modalTextDim: #6B7280;
+  --rk-colors-modalBorder: #1E1E2E;
+  --rk-colors-profileAction: #1E1E2E;
+  --rk-colors-profileActionHover: #2A2A3E;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--ring));
+}
