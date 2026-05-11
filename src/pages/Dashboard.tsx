@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAccount } from 'wagmi';
+import { Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -9,35 +10,18 @@ import { formatScore, formatAddress, cn } from '@/lib/utils';
 import { Wallet, TrendingUp, Shield, Zap, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 
-// Mock data for demonstration
-const MOCK_SCORE_DATA = {
-  totalScore: 742,
-  factors: {
-    stakingHistory: 88,
-    repaymentHistory: 85,
-    walletAge: 72,
-    liquidationRecord: 90,
-    assetDiversity: 65,
-    kycStatus: 75,
-  },
-  history: [
-    { date: '2025-01-01', score: 650 },
-    { date: '2025-01-08', score: 680 },
-    { date: '2025-01-15', score: 710 },
-    { date: '2025-01-22', score: 730 },
-    { date: '2025-01-29', score: 742 },
-  ],
-  qiePassVerified: true,
-};
-
 export function Dashboard() {
   const { address, isConnected } = useAccount();
   const { data: scoreData, isLoading, refetch } = useQieScore();
   const [scoreRequested, setScoreRequested] = useState(false);
 
-  // Use mock data when not connected, real data when connected
-  const displayData = isConnected ? scoreData : MOCK_SCORE_DATA;
-  const displayAddress = address || '0x1234...5678';
+  // Redirect to landing if not connected
+  if (!isConnected) {
+    return <Navigate to="/" replace />;
+  }
+
+  const displayData = scoreData;
+  const displayAddress = address || '';
   const score = displayData?.totalScore || 0;
   const { grade, color } = formatScore(score);
 

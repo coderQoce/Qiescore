@@ -1,5 +1,8 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAccount } from 'wagmi';
+import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 import {
   Activity,
   Shield,
@@ -51,7 +54,18 @@ const features = [
     color: '#10B981',
   },
 ];
+
 export function Landing() {
+  const { isConnected } = useAccount();
+  const navigate = useNavigate();
+
+  // Auto-navigate to dashboard when wallet is connected
+  useEffect(() => {
+    if (isConnected) {
+      navigate('/dashboard');
+    }
+  }, [isConnected, navigate]);
+
   return (
     <div className="space-y-20">
       {/* Hero Section */}
@@ -81,22 +95,61 @@ export function Landing() {
 
             {/* Description */}
             <p className="mx-auto mb-8 max-w-2xl text-lg text-gray-400 md:text-xl">
-              QieScore brings AI-powered credit scoring to the QIE blockchain. 
-              Establish your reputation, unlock better DeFi rates, and mint your 
+              QieScore brings AI-powered credit scoring to the QIE blockchain.
+              Establish your reputation, unlock better DeFi rates, and mint your
               soulbound score NFT.
             </p>
 
             {/* CTA Buttons */}
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Link to="/dashboard">
-                <Button
-                  size="xl"
-                  className="bg-qie-primary text-qie-dark font-bold hover:bg-qie-primary/90 glow-primary"
-                >
-                  <Wallet className="h-5 w-5 mr-2" />
-                  Connect Wallet
-                </Button>
-              </Link>
+              <ConnectButton.Custom>
+                {({ account, chain, openChainModal, openConnectModal, authenticationStatus, mounted }) => {
+                  const ready = mounted && authenticationStatus !== 'loading';
+                  const connected = ready && account && chain;
+
+                  return (
+                    <div
+                      {...(!ready && {
+                        'aria-hidden': true,
+                        style: {
+                          opacity: 0,
+                          pointerEvents: 'none',
+                          userSelect: 'none',
+                        },
+                      })}
+                    >
+                      {(() => {
+                        if (!connected) {
+                          return (
+                            <Button
+                              size="xl"
+                              onClick={openConnectModal}
+                              className="bg-qie-primary text-qie-dark font-bold hover:bg-qie-primary/90 glow-primary"
+                            >
+                              <Wallet className="h-5 w-5 mr-2" />
+                              Connect Wallet
+                            </Button>
+                          );
+                        }
+
+                        if (chain.unsupported) {
+                          return (
+                            <Button
+                              size="xl"
+                              onClick={openChainModal}
+                              className="bg-red-600 text-white font-bold hover:bg-red-700"
+                            >
+                              Wrong Network
+                            </Button>
+                          );
+                        }
+
+                        return null;
+                      })()}
+                    </div>
+                  );
+                }}
+              </ConnectButton.Custom>
               <Link to="/protocol">
                 <Button
                   size="xl"
@@ -165,7 +218,7 @@ export function Landing() {
               Ready to Check Your Score?
             </h2>
             <p className="mb-8 max-w-2xl text-gray-300">
-              Connect your wallet now and discover your QieScore. It takes less than 
+              Connect your wallet now and discover your QieScore. It takes less than
               a minute and could save you thousands in interest.
             </p>
             <Link to="/dashboard">
@@ -178,7 +231,7 @@ export function Landing() {
               </Button>
             </Link>
           </div>
-          
+
           {/* Decorative elements */}
           <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-qie-primary/30 blur-3xl" />
           <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-qie-secondary/30 blur-3xl" />
