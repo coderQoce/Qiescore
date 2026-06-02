@@ -1,21 +1,12 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { type ScoreFactors } from '@/hooks/useQieScore';
 import {
-  Radar,
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Cell,
+  Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+  ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell,
 } from 'recharts';
-import { TrendingUp, Clock, Lock, AlertTriangle, Wallet, Shield } from 'lucide-react';
+import { Clock, Activity, Globe, Wallet } from 'lucide-react';
 
 interface FactorBreakdownProps {
   factors?: ScoreFactors;
@@ -24,27 +15,17 @@ interface FactorBreakdownProps {
 }
 
 const factorConfig = [
-  { key: 'stakingHistory', label: 'Staking History', icon: Lock, color: '#7B2CBF', max: 100 },
-  { key: 'repaymentHistory', label: 'Repayment History', icon: TrendingUp, color: '#00D084', max: 100 },
-  { key: 'walletAge', label: 'Wallet Age & Activity', icon: Clock, color: '#00A8E8', max: 100 },
-  { key: 'liquidationRecord', label: 'Liquidation Record', icon: AlertTriangle, color: '#F59E0B', max: 100 },
-  { key: 'assetDiversity', label: 'Asset Diversity', icon: Wallet, color: '#EC4899', max: 100 },
-  { key: 'kycStatus', label: 'QIE Pass KYC status', icon: Shield, color: '#10B981', max: 100 },
+  { key: 'walletAge', label: 'Wallet Age', icon: Clock, color: '#00A8E8', max: 212 },
+  { key: 'transactionActivity', label: 'Transaction Activity', icon: Activity, color: '#00D084', max: 213 },
+  { key: 'uniqueInteractions', label: 'Protocol Interactions', icon: Globe, color: '#7B2CBF', max: 212 },
+  { key: 'balanceHealth', label: 'Balance Health', icon: Wallet, color: '#F59E0B', max: 213 },
 ];
 
-export function FactorBreakdown({
-  factors,
-  isLoading,
-  chartType = 'radar',
-}: FactorBreakdownProps) {
+export function FactorBreakdown({ factors, isLoading, chartType = 'radar' }: FactorBreakdownProps) {
   if (isLoading) {
     return (
       <Card className="border-qie-border bg-qie-card">
-        <CardHeader>
-          <Skeleton className="h-6 w-40" />
-          <Skeleton className="h-4 w-60" />
-        </CardHeader>
-        <CardContent>
+        <CardContent className="p-6">
           <Skeleton className="h-64 w-full" />
         </CardContent>
       </Card>
@@ -61,7 +42,6 @@ export function FactorBreakdown({
     );
   }
 
-  // Prepare chart data
   const chartData = factorConfig.map((config) => ({
     name: config.label,
     value: factors[config.key as keyof ScoreFactors],
@@ -75,11 +55,11 @@ export function FactorBreakdown({
       <CardHeader>
         <CardTitle className="text-white">Score Factor Breakdown</CardTitle>
         <p className="text-sm text-gray-500">
-          AI analysis of your on-chain behavior across 6 key dimensions
+          AI analysis across 4 key dimensions — max 850 points total
         </p>
       </CardHeader>
       <CardContent>
-        {/* Chart */}
+        {}
         <div className="h-64 w-full mb-6">
           <ResponsiveContainer width="100%" height="100%">
             {chartType === 'radar' ? (
@@ -91,7 +71,7 @@ export function FactorBreakdown({
                 />
                 <PolarRadiusAxis
                   angle={90}
-                  domain={[0, 200]}
+                  domain={[0, 213]}
                   tick={{ fill: '#6B7280', fontSize: 10 }}
                   tickCount={5}
                 />
@@ -106,11 +86,11 @@ export function FactorBreakdown({
               </RadarChart>
             ) : (
               <BarChart data={chartData} layout="vertical">
-                <XAxis type="number" domain={[0, 200]} hide />
+                <XAxis type="number" domain={[0, 213]} hide />
                 <YAxis
                   type="category"
                   dataKey="name"
-                  width={120}
+                  width={150}
                   tick={{ fill: '#9CA3AF', fontSize: 12 }}
                 />
                 <Tooltip
@@ -131,8 +111,8 @@ export function FactorBreakdown({
           </ResponsiveContainer>
         </div>
 
-        {/* Factor Details */}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        {}
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {factorConfig.map((config) => {
             const Icon = config.icon;
             const value = factors[config.key as keyof ScoreFactors];
@@ -141,24 +121,27 @@ export function FactorBreakdown({
             return (
               <div
                 key={config.key}
-                className="flex items-center gap-3 rounded-lg border border-qie-border bg-qie-dark/50 p-3"
+                className="flex flex-col gap-2 rounded-lg border border-qie-border bg-qie-dark/50 p-3"
               >
-                <div
-                  className="flex h-10 w-10 items-center justify-center rounded-lg"
-                  style={{ backgroundColor: `${config.color}20` }}
-                >
-                  <Icon className="h-5 w-5" style={{ color: config.color }} />
+                <div className="flex items-center gap-2">
+                  <div
+                    className="flex h-8 w-8 items-center justify-center rounded-lg"
+                    style={{ backgroundColor: `${config.color}20` }}
+                  >
+                    <Icon className="h-4 w-4" style={{ color: config.color }} />
+                  </div>
+                  <p className="text-xs text-gray-500">{config.label}</p>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-gray-500 truncate">{config.label}</p>
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-white">{value}</span>
-                    <div className="h-1.5 flex-1 rounded-full bg-gray-700">
-                      <div
-                        className="h-full rounded-full transition-all duration-500"
-                        style={{ width: `${percentage}%`, backgroundColor: config.color }}
-                      />
-                    </div>
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-semibold text-white text-sm">{value}</span>
+                    <span className="text-xs text-gray-500">/ {config.max}</span>
+                  </div>
+                  <div className="h-1.5 rounded-full bg-gray-700">
+                    <div
+                      className="h-full rounded-full transition-all duration-500"
+                      style={{ width: `${percentage}%`, backgroundColor: config.color }}
+                    />
                   </div>
                 </div>
               </div>

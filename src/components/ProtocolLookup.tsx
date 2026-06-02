@@ -1,43 +1,61 @@
-import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { useQieScore, useQiePass } from '@/hooks/useQieScore';
-import { ScoreCard } from './ScoreCard';
-import { FactorBreakdown } from './FactorBreakdown';
-import { formatScore, getRiskLevel, formatAddress } from '@/lib/utils';
-import { Search, ExternalLink, Shield, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
-import type { Address } from 'viem';
-import { isAddress } from 'viem';
+
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { useQieScore, useQiePass } from "@/hooks/useQieScore";
+import { ScoreCard } from "./ScoreCard";
+import { FactorBreakdown } from "./FactorBreakdown";
+import {
+  Search,
+  ExternalLink,
+  Shield,
+  AlertCircle,
+  CheckCircle2,
+  Loader2,
+  Clock,
+} from "lucide-react";
+import type { Address } from "viem";
+import { isAddress } from "viem";
+import { getExplorerUrl } from "@/lib/wagmi";
+import { useChainId } from "wagmi";
 
 export function ProtocolLookup() {
-  const [searchAddress, setSearchAddress] = useState('');
-  const [validatedAddress, setValidatedAddress] = useState<Address | undefined>();
-  const [error, setError] = useState('');
+  const chainId = useChainId();
 
-  const { data: scoreData, isLoading: isScoreLoading } = useQieScore(validatedAddress);
-  const { data: passData, isLoading: isPassLoading } = useQiePass(validatedAddress);
+  const [searchAddress, setSearchAddress] = useState("");
+  const [validatedAddress, setValidatedAddress] = useState<
+    Address | undefined
+  >();
+  const [error, setError] = useState("");
+
+  const { data: scoreData, isLoading: isScoreLoading } =
+    useQieScore(validatedAddress);
+  const { data: passData, isLoading: isPassLoading } =
+    useQiePass(validatedAddress);
 
   const handleSearch = () => {
-    setError('');
+    setError("");
     if (!searchAddress.trim()) {
-      setError('Please enter a wallet address');
+      setError("Please enter a wallet address");
       return;
     }
-
-    if (!isAddress(searchAddress as Address)) {
-      setError('Invalid wallet address format');
+    if (!isAddress(searchAddress)) {
+      setError("Invalid wallet address format");
       return;
     }
-
     setValidatedAddress(searchAddress as Address);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSearch();
-    }
+    if (e.key === "Enter") handleSearch();
   };
 
   const isLoading = isScoreLoading || isPassLoading;
@@ -45,7 +63,7 @@ export function ProtocolLookup() {
 
   return (
     <div className="space-y-6">
-      {/* Search Card */}
+      {}
       <Card className="border-qie-border bg-qie-card">
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
@@ -87,75 +105,101 @@ export function ProtocolLookup() {
               {error}
             </div>
           )}
-
-          {/* Example addresses */}
-          <div className="mt-4 flex flex-wrap gap-2">
-            <span className="text-xs text-gray-500">Try examples:</span>
-            {[
-              '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
-              '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
-            ].map((addr) => (
-              <button
-                key={addr}
-                onClick={() => setSearchAddress(addr)}
-                className="text-xs text-qie-secondary hover:underline"
-              >
-                {formatAddress(addr, 4, 4)}
-              </button>
-            ))}
-          </div>
         </CardContent>
       </Card>
 
-      {/* Results */}
+      {}
       {hasSearched && (
         <div className="grid gap-6 lg:grid-cols-3">
-          {/* Score Overview */}
           <div className="lg:col-span-1 space-y-6">
+            {}
             <ScoreCard
               score={scoreData?.totalScore || 0}
               isLoading={isScoreLoading}
               size="lg"
             />
 
-            {/* Verification Status */}
+            {}
             <Card className="border-qie-border bg-qie-card">
-              <CardContent className="p-4">
+              <CardContent className="p-4 space-y-3">
+                {}
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${passData?.isVerified ? 'bg-green-500/20' : 'bg-gray-700/50'
-                      }`}>
-                      <Shield className={`h-5 w-5 ${passData?.isVerified ? 'text-green-500' : 'text-gray-500'
-                        }`} />
-                    </div>
-                    <div>
-                      <p className="font-medium text-white">QIE Pass</p>
-                      <p className="text-xs text-gray-500">
-                        {passData?.isVerified ? 'Verified Identity' : 'Not Verified'}
-                      </p>
-                    </div>
-                  </div>
-                  <Badge variant={passData?.isVerified ? 'verified' : 'outline'}>
-                    {passData?.isVerified ? (
+                  <span className="text-sm text-gray-400">QieScore NFT</span>
+                  <Badge variant={scoreData?.hasMinted ? "default" : "outline"}>
+                    {scoreData?.hasMinted ? (
                       <span className="flex items-center gap-1">
                         <CheckCircle2 className="h-3 w-3" />
-                        Verified
+                        Minted
                       </span>
                     ) : (
-                      'Unverified'
+                      "Not Minted"
                     )}
                   </Badge>
                 </div>
+
+                {}
+                {scoreData?.hasMinted && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-400">
+                      Refresh Status
+                    </span>
+                    <Badge
+                      variant="outline"
+                      style={{
+                        borderColor: scoreData?.canRefresh
+                          ? "#00D084"
+                          : "#F59E0B",
+                        color: scoreData?.canRefresh ? "#00D084" : "#F59E0B",
+                      }}
+                    >
+                      <Clock className="h-3 w-3 mr-1" />
+                      {scoreData?.canRefresh ? "Available" : "Not yet"}
+                    </Badge>
+                  </div>
+                )}
+
+                {}
+                {passData !== null && (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Shield
+                        className={`h-4 w-4 ${
+                          passData?.isVerified
+                            ? "text-green-500"
+                            : "text-gray-500"
+                        }`}
+                      />
+                      <span className="text-sm text-gray-400">QIE Pass</span>
+                    </div>
+                    <Badge
+                      variant={passData?.isVerified ? "default" : "outline"}
+                    >
+                      {passData?.isVerified ? (
+                        <span className="flex items-center gap-1">
+                          <CheckCircle2 className="h-3 w-3" />
+                          Verified
+                        </span>
+                      ) : (
+                        "Unverified"
+                      )}
+                    </Badge>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
-            {/* Quick Actions */}
+            {}
             <Card className="border-qie-border bg-qie-card">
-              <CardContent className="p-4 space-y-3">
+              <CardContent className="p-4">
                 <Button
                   variant="outline"
                   className="w-full border-qie-border hover:bg-qie-primary/10 hover:border-qie-primary"
-                  onClick={() => window.open(`https://mainnet.qiblockchain.online/address/${validatedAddress}`, '_blank')}
+                  onClick={() =>
+                    window.open(
+                      `${getExplorerUrl(chainId)}/address/${validatedAddress}`,
+                      "_blank",
+                    )
+                  }
                 >
                   <ExternalLink className="h-4 w-4 mr-2" />
                   View on Explorer
@@ -164,7 +208,7 @@ export function ProtocolLookup() {
             </Card>
           </div>
 
-          {/* Detailed Breakdown */}
+          {}
           <div className="lg:col-span-2">
             <FactorBreakdown
               factors={scoreData?.factors}
@@ -175,7 +219,7 @@ export function ProtocolLookup() {
         </div>
       )}
 
-      {/* Empty State */}
+      {}
       {!hasSearched && (
         <Card className="border-qie-border bg-qie-card/50 border-dashed">
           <CardContent className="p-12 text-center">
@@ -184,8 +228,9 @@ export function ProtocolLookup() {
               Enter a wallet address to begin
             </h3>
             <p className="text-sm text-gray-500 max-w-md mx-auto">
-              The protocol lookup allows lenders and developers to instantly check any
-              wallet&apos;s QieScore and risk assessment without connecting a wallet.
+              The protocol lookup allows lenders and developers to instantly
+              check any wallet's QieScore and risk assessment without connecting
+              a wallet.
             </p>
           </CardContent>
         </Card>

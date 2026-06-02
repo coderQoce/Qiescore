@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { type ScoreRecord } from '@/hooks/useQieScore';
@@ -33,25 +34,29 @@ export function ScoreHistory({ history, isLoading, currentScore }: ScoreHistoryP
     );
   }
 
-  // Generate mock history if none exists
+  
   const chartData = history?.length
     ? history.map((record) => ({
-      date: new Date(record.timestamp).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-      }),
-      fullDate: new Date(record.timestamp).toLocaleDateString(),
-      score: record.score,
-    }))
+        date: new Date(record.timestamp).toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+        }),
+        fullDate: new Date(record.timestamp).toLocaleDateString(),
+        score: record.score,
+      }))
     : generateMockHistory(currentScore);
 
-  const scoreChange = chartData.length > 1
-    ? chartData[chartData.length - 1].score - chartData[0].score
-    : 0;
+  const scoreChange =
+    chartData.length > 1
+      ? chartData[chartData.length - 1].score - chartData[0].score
+      : 0;
 
-  const averageScore = chartData.length > 0
-    ? Math.round(chartData.reduce((acc, d) => acc + d.score, 0) / chartData.length)
-    : currentScore;
+  const averageScore =
+    chartData.length > 0
+      ? Math.round(
+          chartData.reduce((acc, d) => acc + d.score, 0) / chartData.length
+        )
+      : currentScore;
 
   return (
     <Card className="border-qie-border bg-qie-card card-hover">
@@ -73,13 +78,14 @@ export function ScoreHistory({ history, isLoading, currentScore }: ScoreHistoryP
               <TrendingDown className="h-4 w-4 text-red-500" />
             )}
             <span className={scoreChange >= 0 ? 'text-green-500' : 'text-red-500'}>
-              {scoreChange >= 0 ? '+' : ''}{scoreChange} points
+              {scoreChange >= 0 ? '+' : ''}
+              {scoreChange} points
             </span>
           </div>
         </div>
       </CardHeader>
       <CardContent>
-        {/* Chart */}
+        {}
         <div className="h-48 w-full mb-6">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData}>
@@ -90,7 +96,7 @@ export function ScoreHistory({ history, isLoading, currentScore }: ScoreHistoryP
                 tickLine={{ stroke: '#374151' }}
               />
               <YAxis
-                domain={[0, 1000]}
+                domain={[300, 850]}
                 tick={{ fill: '#6B7280', fontSize: 12 }}
                 axisLine={{ stroke: '#374151' }}
                 tickLine={{ stroke: '#374151' }}
@@ -121,13 +127,18 @@ export function ScoreHistory({ history, isLoading, currentScore }: ScoreHistoryP
                 stroke="#00D084"
                 strokeWidth={3}
                 dot={{ fill: '#00D084', strokeWidth: 0, r: 4 }}
-                activeDot={{ r: 6, stroke: '#00D084', strokeWidth: 2, fill: '#111118' }}
+                activeDot={{
+                  r: 6,
+                  stroke: '#00D084',
+                  strokeWidth: 2,
+                  fill: '#111118',
+                }}
               />
             </LineChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Stats */}
+        {}
         <div className="grid grid-cols-3 gap-4 border-t border-qie-border pt-4">
           <div className="text-center">
             <p className="text-xs text-gray-500 uppercase tracking-wider">Current</p>
@@ -147,8 +158,10 @@ export function ScoreHistory({ history, isLoading, currentScore }: ScoreHistoryP
   );
 }
 
-// Generate realistic mock history for demo
-function generateMockHistory(currentScore: number): Array<{ date: string; fullDate: string; score: number }> {
+
+function generateMockHistory(
+  currentScore: number
+): Array<{ date: string; fullDate: string; score: number }> {
   const data = [];
   const days = 30;
   let score = Math.max(300, currentScore - 100);
@@ -157,9 +170,9 @@ function generateMockHistory(currentScore: number): Array<{ date: string; fullDa
     const date = new Date();
     date.setDate(date.getDate() - (days - i));
 
-    // Simulate gradual improvement
-    score += Math.random() * 20 - 5;
-    score = Math.min(1000, Math.max(300, score));
+    
+    score += Math.random() * 30 - 8;
+    score = Math.min(850, Math.max(300, score));
 
     data.push({
       date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
@@ -168,7 +181,7 @@ function generateMockHistory(currentScore: number): Array<{ date: string; fullDa
     });
   }
 
-  // Ensure last point matches current
+  
   data.push({
     date: 'Today',
     fullDate: new Date().toLocaleDateString(),

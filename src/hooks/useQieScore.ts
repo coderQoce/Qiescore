@@ -1,16 +1,16 @@
+
 import { useAccount, useReadContract, useChainId } from 'wagmi';
-import { SCORE_ORACLE_ABI, QIE_PASS_ABI } from '@/lib/abis';
+import { SCORE_NFT_ABI, QIE_PASS_ABI } from '@/lib/abis';
 import { getContracts } from '@/lib/wagmi';
 import { useMemo } from 'react';
 import type { Address } from 'viem';
+import { formatScore } from '@/lib/utils';
 
 export interface ScoreFactors {
-  repaymentHistory: number;
   walletAge: number;
-  stakingCommitment: number;
-  liquidationRecord: number;
-  assetDiversity: number;
-  kycBoost: number;
+  transactionActivity: number;
+  uniqueInteractions: number;
+  balanceHealth: number;
 }
 
 export interface ScoreRecord {
@@ -20,9 +20,11 @@ export interface ScoreRecord {
 
 export interface ScoreData {
   totalScore: number;
-  riskLevel: number;
+  grade: string;
   factors: ScoreFactors;
   history: ScoreRecord[];
+  canRefresh: boolean;
+  hasMinted: boolean;
 }
 
 export interface QiePassData {
@@ -31,157 +33,163 @@ export interface QiePassData {
   verifiedAt: number;
 }
 
-// Hook to fetch AI credit score for any wallet address
 export function useQieScore(address?: Address) {
   const { address: connectedAddress } = useAccount();
   const chainId = useChainId();
   const targetAddress = address || connectedAddress;
-  const contracts = getContracts(chainId || 8428);
+  const contracts = getContracts(chainId || 1983);
 
-  // Fetch total score and risk level
+  
+  const {
+    data: hasMintedData,
+    isLoading: isMintedLoading,
+    refetch: refetchMinted,
+  } = useReadContract({
+    address: contracts.scoreNFT as Address,
+    abi: SCORE_NFT_ABI,
+    functionName: 'hasMinted',
+    args: targetAddress ? [targetAddress] : undefined,
+    query: {
+      enabled: !!targetAddress,
+      staleTime: 30000,
+    },
+  });
+
+  
   const {
     data: scoreData,
     isLoading: isScoreLoading,
-    error: scoreError,
     refetch: refetchScore,
   } = useReadContract({
-    address: contracts.scoreOracle as Address,
-    abi: SCORE_ORACLE_ABI,
-    functionName: 'calculateScore',
+    address: contracts.scoreNFT as Address,
+    abi: SCORE_NFT_ABI,
+    functionName: 'getScore',
     args: targetAddress ? [targetAddress] : undefined,
     query: {
-      enabled: !!targetAddress,
+      enabled: !!targetAddress && !!hasMintedData,
       staleTime: 60000,
     },
   });
 
-  // Fetch detailed score factors
-  const {
-    data: factorsData,
-    isLoading: isFactorsLoading,
-    error: factorsError,
-  } = useReadContract({
-    address: contracts.scoreOracle as Address,
-    abi: SCORE_ORACLE_ABI,
-    functionName: 'getScoreFactors',
-    args: targetAddress ? [targetAddress] : undefined,
-    query: {
-      enabled: !!targetAddress,
-      staleTime: 60000,
-    },
-  });
-
-  // Fetch score history
+  
   const {
     data: historyData,
     isLoading: isHistoryLoading,
-    error: historyError,
+    refetch: refetchHistory,
   } = useReadContract({
-    address: contracts.scoreOracle as Address,
-    abi: SCORE_ORACLE_ABI,
+    address: contracts.scoreNFT as Address,
+    abi: SCORE_NFT_ABI,
     functionName: 'getScoreHistory',
     args: targetAddress ? [targetAddress] : undefined,
     query: {
-      enabled: !!targetAddress,
+      enabled: !!targetAddress && !!hasMintedData,
       staleTime: 300000,
     },
   });
 
+  
+  const {
+    data: canRefreshData,
+    isLoading: isRefreshLoading,
+    refetch: refetchCanRefresh,
+  } = useReadContract({
+    address: contracts.scoreNFT as Address,
+    abi: SCORE_NFT_ABI,
+    functionName: 'canRefresh',
+    args: targetAddress ? [targetAddress] : undefined,
+    query: {
+      enabled: !!targetAddress && !!hasMintedData,
+      staleTime: 30000,
+    },
+  });
+
   const data: ScoreData | null = useMemo(() => {
-    if (!scoreData || !factorsData) return null;
+    if (!hasMintedData) return null;
 
-    const [totalScore, riskLevel] = scoreData as [bigint, bigint];
-    const factors = factorsData as {
-      repaymentHistory: bigint;
-      walletAge: bigint;
-      stakingCommitment: bigint;
-      liquidationRecord: bigint;
-      assetDiversity: bigint;
-      kycBoost: bigint;
-    };
+    const score = Number(scoreData || 0);
 
-    const history = (historyData as { score: bigint; timestamp: bigint }[] | undefined)?.map(
-      (record) => ({
-        score: Number(record.score),
-        timestamp: Number(record.timestamp) * 1000,
-      })
-    ) || [];
+    
+    
+    const rawHistory = (historyData as bigint[] | undefined) || [];
+    const history: ScoreRecord[] = rawHistory.map((s, index) => ({
+      score: Number(s),
+      timestamp: Date.now() - (rawHistory.length - 1 - index) * 24 * 60 * 60 * 1000,
+    }));
 
     return {
-      totalScore: Number(totalScore),
-      riskLevel: Number(riskLevel),
+      totalScore: score,
+      grade: formatScore(score).grade,
       factors: {
-        repaymentHistory: Number(factors.repaymentHistory),
-        walletAge: Number(factors.walletAge),
-        stakingCommitment: Number(factors.stakingCommitment),
-        liquidationRecord: Number(factors.liquidationRecord),
-        assetDiversity: Number(factors.assetDiversity),
-        kycBoost: Number(factors.kycBoost),
+        walletAge: 0,
+        transactionActivity: 0,
+        uniqueInteractions: 0,
+        balanceHealth: 0,
       },
       history,
+      canRefresh: (canRefreshData as boolean) ?? false,
+      hasMinted: hasMintedData as boolean,
     };
-  }, [scoreData, factorsData, historyData]);
+  }, [hasMintedData, scoreData, historyData, canRefreshData]);
+
+  const refetch = () => {
+    refetchMinted();
+    refetchScore();
+    refetchHistory();
+    refetchCanRefresh();
+  };
 
   return {
     data,
-    isLoading: isScoreLoading || isFactorsLoading || isHistoryLoading,
-    error: scoreError || factorsError || historyError,
-    refetch: refetchScore,
+    isLoading: isMintedLoading || isScoreLoading || isHistoryLoading || isRefreshLoading,
+    refetch,
   };
 }
 
-// Hook to check QIE Pass verification status
+
 export function useQiePass(address?: Address) {
   const { address: connectedAddress } = useAccount();
   const chainId = useChainId();
   const targetAddress = address || connectedAddress;
-  const contracts = getContracts(chainId || 8428);
+  const contracts = getContracts(chainId || 1983);
 
-  const {
-    data: verifiedData,
-    isLoading: isVerifiedLoading,
-  } = useReadContract({
+  const { data: verifiedData, isLoading: isVerifiedLoading } = useReadContract({
     address: contracts.qiePass as Address,
     abi: QIE_PASS_ABI,
     functionName: 'isVerified',
     args: targetAddress ? [targetAddress] : undefined,
     query: {
-      enabled: !!targetAddress,
+      enabled: !!targetAddress &&
+        contracts.qiePass !== '0x0000000000000000000000000000000000000000',
       staleTime: 300000,
     },
   });
 
-  const {
-    data: levelData,
-    isLoading: isLevelLoading,
-  } = useReadContract({
+  const { data: levelData, isLoading: isLevelLoading } = useReadContract({
     address: contracts.qiePass as Address,
     abi: QIE_PASS_ABI,
     functionName: 'verificationLevel',
     args: targetAddress ? [targetAddress] : undefined,
     query: {
-      enabled: !!targetAddress,
+      enabled: !!targetAddress &&
+        contracts.qiePass !== '0x0000000000000000000000000000000000000000',
       staleTime: 300000,
     },
   });
 
-  const {
-    data: timestampData,
-    isLoading: isTimestampLoading,
-  } = useReadContract({
+  const { data: timestampData, isLoading: isTimestampLoading } = useReadContract({
     address: contracts.qiePass as Address,
     abi: QIE_PASS_ABI,
     functionName: 'verifiedAt',
     args: targetAddress ? [targetAddress] : undefined,
     query: {
-      enabled: !!targetAddress,
+      enabled: !!targetAddress &&
+        contracts.qiePass !== '0x0000000000000000000000000000000000000000',
       staleTime: 300000,
     },
   });
 
   const data: QiePassData | null = useMemo(() => {
     if (verifiedData === undefined) return null;
-
     return {
       isVerified: verifiedData as boolean,
       verificationLevel: Number(levelData || 0),

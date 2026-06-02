@@ -9,7 +9,7 @@ import { Landing, Dashboard, Score, Protocol, ApiDocs } from '@/pages';
 import '@rainbow-me/rainbowkit/styles.css';
 import '@/styles/globals.css';
 
-// Create a client for TanStack Query
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {

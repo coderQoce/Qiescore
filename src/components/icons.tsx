@@ -1,6 +1,4 @@
-// Custom SVG Icons (replacing lucide-react)
 
-import React from 'react';
 
 interface IconProps {
   className?: string;

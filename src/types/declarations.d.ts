@@ -1,4 +1,4 @@
-// Type declarations for packages without built-in types
+
 
 declare module 'sonner' {
   import * as React from 'react';
