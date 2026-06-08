@@ -11,49 +11,9 @@ import {
   Zap,
   Globe,
   ChevronRight,
-  Sparkles,
   Wallet,
   BarChart3,
 } from 'lucide-react';
-
-const features = [
-  {
-    icon: Activity,
-    title: 'AI-Powered Scoring',
-    description: 'Machine learning algorithms analyze on-chain behavior to generate accurate credit scores.',
-    color: '#00D084',
-  },
-  {
-    icon: Shield,
-    title: 'Non-Custodial',
-    description: 'Your assets never leave your wallet. We only read on-chain data, never hold your funds.',
-    color: '#00A8E8',
-  },
-  {
-    icon: Lock,
-    title: 'Soulbound NFT',
-    description: 'Your QieScore is minted as a non-transferable NFT, establishing on-chain reputation.',
-    color: '#7B2CBF',
-  },
-  {
-    icon: TrendingUp,
-    title: 'Better DeFi Rates',
-    description: 'Unlock preferential borrowing rates on QieLend based on your reputation.',
-    color: '#F59E0B',
-  },
-  {
-    icon: Zap,
-    title: 'Instant Approval',
-    description: 'No paperwork, no waiting. Get your score and start borrowing in minutes.',
-    color: '#EC4899',
-  },
-  {
-    icon: Globe,
-    title: 'Protocol Integration',
-    description: 'Easy API for lenders and developers to verify borrower creditworthiness.',
-    color: '#10B981',
-  },
-];
 
 export function Landing() {
   const { isConnected } = useAccount();

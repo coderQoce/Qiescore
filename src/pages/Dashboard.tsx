@@ -3,16 +3,30 @@ import { useAccount } from 'wagmi';
 import { Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
 import { ScoreCard, FactorBreakdown, ScoreHistory } from '@/components';
-import { useQieScore } from '@/hooks/useQieScore';
-import { formatScore, formatAddress, cn } from '@/lib/utils';
-import { Wallet, TrendingUp, Shield, Zap, ArrowRight } from 'lucide-react';
+import { formatScore, formatAddress } from '@/lib/utils';
+import { calculateScore } from '@/lib/api';
+import { Wallet, TrendingUp, Zap, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
+
+interface ScoreData {
+  totalScore: number;
+  factors: {
+    stakingHistory: number;
+    repaymentHistory: number;
+    walletAge: number;
+    liquidationRecord: number;
+    assetDiversity: number;
+    kycStatus: number;
+  };
+  history: Array<{ date: string; score: number; timestamp?: string }>;
+  qiePassVerified: boolean;
+}
 
 export function Dashboard() {
   const { address, isConnected } = useAccount();
-  const { data: scoreData, isLoading, refetch } = useQieScore();
+  const [scoreData, setScoreData] = useState<ScoreData | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [scoreRequested, setScoreRequested] = useState(false);
 
   // Redirect to landing if not connected
@@ -26,13 +40,26 @@ export function Dashboard() {
   const { grade, color } = formatScore(score);
 
   const handleRequestScore = async () => {
-    toast.loading('Analyzing your on-chain history...', { id: 'request' });
-    setScoreRequested(true);
+    if (!address) {
+      toast.error('Wallet address not found', { id: 'request' });
+      return;
+    }
 
-    // Simulate API call
-    setTimeout(() => {
-      toast.success('Score calculated successfully!', { id: 'request' });
-    }, 2000);
+    try {
+      toast.loading('Analyzing your on-chain history...', { id: 'request' });
+      setIsLoading(true);
+
+      const result = await calculateScore(address);
+      setScoreData(result);
+      setScoreRequested(true);
+
+      toast.success('Score calculated successfully!', { id: 'request', duration: 3000 });
+    } catch (error) {
+      console.error('Score calculation failed:', error);
+      toast.error('Failed to calculate score. Please try again.', { id: 'request', duration: 3000 });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const calculateBorrowingPower = () => {

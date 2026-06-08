@@ -11,7 +11,7 @@ import {
   MintButton,
 } from '@/components';
 import { useQieScore } from '@/hooks/useQieScore';
-import { Brain, Loader2, Sparkles, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Brain, Sparkles, CheckCircle2, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Analysis steps for loading animation
@@ -51,7 +51,7 @@ export function Score() {
 
     // Fetch actual data
     await refetch();
-    
+
     setAnalyzing(false);
     setShowResults(true);
     toast.success('Your QieScore is ready!');
@@ -103,9 +103,8 @@ export function Score() {
                 {analysisSteps.map((_, i) => (
                   <div
                     key={i}
-                    className={`h-2 w-2 rounded-full transition-all ${
-                      i <= currentStep ? 'bg-qie-primary w-4' : 'bg-gray-700'
-                    }`}
+                    className={`h-2 w-2 rounded-full transition-all ${i <= currentStep ? 'bg-qie-primary w-4' : 'bg-gray-700'
+                      }`}
                   />
                 ))}
               </div>
@@ -125,7 +124,7 @@ export function Score() {
               Ready to Generate Your Score
             </h3>
             <p className="mb-6 text-gray-400 max-w-md mx-auto">
-              This process analyzes your transaction history, wallet age, staking 
+              This process analyzes your transaction history, wallet age, staking
               positions, and more. It takes about 30 seconds.
             </p>
             <Button
@@ -166,7 +165,7 @@ export function Score() {
                 isLoading={isLoading}
                 size="lg"
               />
-              
+
               <Card className="border-qie-border bg-qie-card">
                 <CardHeader>
                   <CardTitle className="text-base text-white">Next Steps</CardTitle>
@@ -190,7 +189,7 @@ export function Score() {
                 isLoading={isLoading}
                 chartType="radar"
               />
-              
+
               <ScoreHistory
                 history={scoreData?.history}
                 isLoading={isLoading}

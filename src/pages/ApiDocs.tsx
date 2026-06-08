@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Copy, Check, Code, Terminal, FileJson, Globe } from 'lucide-react';
+import { Copy, Check, Globe } from 'lucide-react';
 
 const endpoints = [
   {
@@ -156,7 +156,7 @@ export function ApiDocs() {
         </p>
       </div>
 
-    
+
 
       <Tabs defaultValue="rest" className="w-full">
         <TabsList className="bg-qie-card border border-qie-border">
@@ -173,7 +173,6 @@ export function ApiDocs() {
             Ethers.js
           </TabsTrigger> */}
         </TabsList>
-
         {/* REST API Tab */}
         <TabsContent value="rest" className="space-y-4">
           <Card className="border-qie-border bg-qie-card">
