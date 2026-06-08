@@ -9,11 +9,7 @@ import {
   ChevronRight,
   Wallet,
   BarChart3,
-<<<<<<< HEAD
-} from 'lucide-react';
-=======
 } from "lucide-react";
->>>>>>> 6b1edb42dc375f235193a1c5205adc4f08d8d923
 
 export function Landing() {
   const { isConnected } = useAccount();

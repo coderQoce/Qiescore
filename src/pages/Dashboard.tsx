@@ -1,15 +1,3 @@
-<<<<<<< HEAD
-import { useState } from 'react';
-import { useAccount } from 'wagmi';
-import { Navigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScoreCard, FactorBreakdown, ScoreHistory } from '@/components';
-import { formatScore, formatAddress } from '@/lib/utils';
-import { calculateScore } from '@/lib/api';
-import { Wallet, TrendingUp, Zap, ArrowRight } from 'lucide-react';
-import { toast } from 'sonner';
-=======
 
 import { useState } from "react";
 import { useAccount } from "wagmi";
@@ -22,33 +10,12 @@ import { formatScore, formatAddress, getRiskLevel } from "@/lib/utils";
 import { Wallet, TrendingUp, Zap, ArrowRight, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
->>>>>>> 6b1edb42dc375f235193a1c5205adc4f08d8d923
-
-interface ScoreData {
-  totalScore: number;
-  factors: {
-    stakingHistory: number;
-    repaymentHistory: number;
-    walletAge: number;
-    liquidationRecord: number;
-    assetDiversity: number;
-    kycStatus: number;
-  };
-  history: Array<{ date: string; score: number; timestamp?: string }>;
-  qiePassVerified: boolean;
-}
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://qiescore-backend.onrender.com";
 
 export function Dashboard() {
   const { address, isConnected } = useAccount();
-<<<<<<< HEAD
-  const [scoreData, setScoreData] = useState<ScoreData | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [scoreRequested, setScoreRequested] = useState(false);
-=======
   const { data: scoreData, isLoading, refetch } = useQieScore();
   const [isRequesting, setIsRequesting] = useState(false);
->>>>>>> 6b1edb42dc375f235193a1c5205adc4f08d8d923
 
   if (!isConnected) {
     return <Navigate to="/" replace />;
@@ -59,27 +26,6 @@ export function Dashboard() {
   const risk = getRiskLevel(score);
 
   const handleRequestScore = async () => {
-<<<<<<< HEAD
-    if (!address) {
-      toast.error('Wallet address not found', { id: 'request' });
-      return;
-    }
-
-    try {
-      toast.loading('Analyzing your on-chain history...', { id: 'request' });
-      setIsLoading(true);
-
-      const result = await calculateScore(address);
-      setScoreData(result);
-      setScoreRequested(true);
-
-      toast.success('Score calculated successfully!', { id: 'request', duration: 3000 });
-    } catch (error) {
-      console.error('Score calculation failed:', error);
-      toast.error('Failed to calculate score. Please try again.', { id: 'request', duration: 3000 });
-    } finally {
-      setIsLoading(false);
-=======
     if (!address) return;
 
     setIsRequesting(true);
@@ -112,7 +58,6 @@ export function Dashboard() {
       toast.error(message, { id: "request" });
     } finally {
       setIsRequesting(false);
->>>>>>> 6b1edb42dc375f235193a1c5205adc4f08d8d923
     }
   };
 
@@ -147,7 +92,7 @@ export function Dashboard() {
 
   return (
     <div className="space-y-8">
-      {}
+      { }
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold text-white">Your Credit Score</h1>
         <p className="text-gray-400 flex items-center gap-2">
@@ -156,7 +101,7 @@ export function Dashboard() {
         </p>
       </div>
 
-      {}
+      { }
       {!scoreData?.hasMinted ? (
         <Card className="border-qie-border bg-gradient-to-br from-qie-primary/10 to-qie-secondary/5">
           <CardContent className="p-8 text-center">

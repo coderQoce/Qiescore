@@ -7,10 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { ScoreCard, FactorBreakdown, ScoreHistory } from '@/components';
 import { useQieScore } from '@/hooks/useQieScore';
-<<<<<<< HEAD
-=======
 import { type ScoreFactors } from '@/hooks/useQieScore';
->>>>>>> 6b1edb42dc375f235193a1c5205adc4f08d8d923
 import { Brain, Sparkles, CheckCircle2, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { getExplorerUrl } from '@/lib/wagmi';
@@ -65,14 +62,6 @@ export function Score() {
       await new Promise((resolve) => setTimeout(resolve, 600));
     }
 
-<<<<<<< HEAD
-    // Fetch actual data
-    await refetch();
-
-    setAnalyzing(false);
-    setShowResults(true);
-    toast.success('Your QieScore is ready!');
-=======
     try {
       const response = await fetch(`${BACKEND_URL}/score/request`, {
         method: 'POST',
@@ -111,7 +100,6 @@ export function Score() {
     } finally {
       setAnalyzing(false);
     }
->>>>>>> 6b1edb42dc375f235193a1c5205adc4f08d8d923
   };
 
   const score = scoreResult?.score || scoreData?.totalScore || 0;
@@ -150,14 +138,9 @@ export function Score() {
                 {analysisSteps.map((_, i) => (
                   <div
                     key={i}
-<<<<<<< HEAD
-                    className={`h-2 w-2 rounded-full transition-all ${i <= currentStep ? 'bg-qie-primary w-4' : 'bg-gray-700'
-                      }`}
-=======
                     className={`h-2 rounded-full transition-all ${
                       i <= currentStep ? 'bg-qie-primary w-4' : 'bg-gray-700 w-2'
                     }`}
->>>>>>> 6b1edb42dc375f235193a1c5205adc4f08d8d923
                   />
                 ))}
               </div>
@@ -177,13 +160,8 @@ export function Score() {
               Ready to Generate Your Score
             </h3>
             <p className="mb-6 text-gray-400 max-w-md mx-auto">
-<<<<<<< HEAD
-              This process analyzes your transaction history, wallet age, staking
-              positions, and more. It takes about 30 seconds.
-=======
               This process analyzes your transaction history, wallet age,
               on-chain interactions, and balance. Takes about 30 seconds.
->>>>>>> 6b1edb42dc375f235193a1c5205adc4f08d8d923
             </p>
             <Button
               size="lg"
@@ -237,13 +215,6 @@ export function Score() {
           {}
           <div className="grid gap-6 lg:grid-cols-3">
             <div className="space-y-6">
-<<<<<<< HEAD
-              <ScoreCard
-                score={score}
-                isLoading={isLoading}
-                size="lg"
-              />
-=======
               <ScoreCard score={score} isLoading={isLoading} size="lg" />
 
               {}
@@ -262,7 +233,6 @@ export function Score() {
                   </CardContent>
                 </Card>
               )}
->>>>>>> 6b1edb42dc375f235193a1c5205adc4f08d8d923
 
               <Card className="border-qie-border bg-qie-card">
                 <CardHeader>
@@ -298,10 +268,6 @@ export function Score() {
                 isLoading={false}
                 chartType="radar"
               />
-<<<<<<< HEAD
-
-=======
->>>>>>> 6b1edb42dc375f235193a1c5205adc4f08d8d923
               <ScoreHistory
                 history={scoreData?.history}
                 isLoading={isLoading}

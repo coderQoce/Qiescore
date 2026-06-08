@@ -4,13 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-<<<<<<< HEAD
-import { Copy, Check, Globe } from 'lucide-react';
-=======
 import { Copy, Check, Globe, Code, Terminal } from 'lucide-react';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
->>>>>>> 6b1edb42dc375f235193a1c5205adc4f08d8d923
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://qiescore-backend.onrender.com';
 
 const endpoints = [
   {
@@ -172,7 +168,7 @@ function CopyButton({ text }: { text: string }) {
 export function ApiDocs() {
   return (
     <div className="space-y-6">
-      {}
+      { }
       <div>
         <h1 className="text-2xl font-bold text-white">API Documentation</h1>
         <p className="text-sm text-gray-500 mt-1">
@@ -180,11 +176,6 @@ export function ApiDocs() {
         </p>
       </div>
 
-<<<<<<< HEAD
-
-
-=======
->>>>>>> 6b1edb42dc375f235193a1c5205adc4f08d8d923
       <Tabs defaultValue="rest" className="w-full">
         <TabsList className="bg-qie-card border border-qie-border">
           <TabsTrigger value="rest" className="data-[state=active]:bg-qie-primary/20">
@@ -200,15 +191,11 @@ export function ApiDocs() {
             Ethers.js
           </TabsTrigger>
         </TabsList>
-<<<<<<< HEAD
-        {/* REST API Tab */}
-=======
 
-        {}
->>>>>>> 6b1edb42dc375f235193a1c5205adc4f08d8d923
+        { }
         <TabsContent value="rest" className="space-y-4">
 
-          {}
+          { }
           <Card className="border-qie-border bg-qie-card">
             <CardHeader>
               <CardTitle className="text-white">Base URL</CardTitle>
@@ -223,7 +210,7 @@ export function ApiDocs() {
             </CardContent>
           </Card>
 
-          {}
+          { }
           <Card className="border-qie-border bg-qie-card">
             <CardHeader>
               <CardTitle className="text-white">FICO Score Range</CardTitle>
@@ -260,7 +247,7 @@ export function ApiDocs() {
             </CardContent>
           </Card>
 
-          {}
+          { }
           <Card className="border-qie-border bg-qie-card">
             <CardHeader>
               <CardTitle className="text-white">Quick Start</CardTitle>
@@ -275,7 +262,7 @@ export function ApiDocs() {
             </CardContent>
           </Card>
 
-          {}
+          { }
           {endpoints.map((endpoint) => (
             <Card key={endpoint.path} className="border-qie-border bg-qie-card">
               <CardHeader>
@@ -332,7 +319,7 @@ export function ApiDocs() {
           ))}
         </TabsContent>
 
-        {}
+        { }
         <TabsContent value="solidity" className="space-y-4">
           <Card className="border-qie-border bg-qie-card">
             <CardHeader>
@@ -342,7 +329,7 @@ export function ApiDocs() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {}
+              { }
               <div className="space-y-2">
                 <h4 className="text-sm font-semibold text-white">Registry Addresses</h4>
                 <div className="space-y-2">
@@ -370,7 +357,7 @@ export function ApiDocs() {
           </Card>
         </TabsContent>
 
-        {}
+        { }
         <TabsContent value="ethers" className="space-y-4">
           <Card className="border-qie-border bg-qie-card">
             <CardHeader>
