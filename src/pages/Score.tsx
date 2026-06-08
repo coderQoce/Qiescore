@@ -1,93 +1,142 @@
+
 import { useState } from 'react';
-import { useAccount } from 'wagmi';
+import { useAccount, useChainId } from 'wagmi';
 import { Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import {
-  ScoreCard,
-  FactorBreakdown,
-  ScoreHistory,
-  MintButton,
-} from '@/components';
+import { ScoreCard, FactorBreakdown, ScoreHistory } from '@/components';
 import { useQieScore } from '@/hooks/useQieScore';
+<<<<<<< HEAD
+=======
+import { type ScoreFactors } from '@/hooks/useQieScore';
+>>>>>>> 6b1edb42dc375f235193a1c5205adc4f08d8d923
 import { Brain, Sparkles, CheckCircle2, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
+import { getExplorerUrl } from '@/lib/wagmi';
 
-// Analysis steps for loading animation
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+
 const analysisSteps = [
   'Scanning transaction history...',
   'Analyzing wallet age and activity...',
-  'Evaluating staking positions...',
-  'Checking liquidation records...',
-  'Assessing asset diversity...',
+  'Evaluating on-chain interactions...',
+  'Checking balance health...',
   'Verifying QIE Pass status...',
   'Calculating final score...',
 ];
 
+interface ScoreResult {
+  score: number;
+  grade: string;
+  summary: string;
+  recommendation: string;
+  factors: ScoreFactors;
+  txHash: string;
+  isNewMint: boolean;
+}
+
 export function Score() {
-  const { isConnected } = useAccount();
+  const chainId = useChainId();
+  const { address, isConnected } = useAccount();
   const [analyzing, setAnalyzing] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [showResults, setShowResults] = useState(false);
+  const [scoreResult, setScoreResult] = useState<ScoreResult | null>(null);
 
   const { data: scoreData, isLoading, refetch } = useQieScore();
 
-  // Redirect to landing if not connected
   if (!isConnected) {
     return <Navigate to="/" replace />;
   }
 
   const handleRequestScore = async () => {
+    if (!address) return;
+
     setAnalyzing(true);
     setCurrentStep(0);
     setShowResults(false);
+    setScoreResult(null);
 
-    // Simulate step-by-step analysis
+    
     for (let i = 0; i < analysisSteps.length; i++) {
       setCurrentStep(i);
       await new Promise((resolve) => setTimeout(resolve, 600));
     }
 
+<<<<<<< HEAD
     // Fetch actual data
     await refetch();
 
     setAnalyzing(false);
     setShowResults(true);
     toast.success('Your QieScore is ready!');
+=======
+    try {
+      const response = await fetch(`${BACKEND_URL}/score/request`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ wallet: address }),
+      });
+
+      let result;
+      try {
+        result = await response.json();
+      } catch {
+        throw new Error(`Server error: ${response.status}`);
+      }
+      if (!response.ok) {
+        throw new Error(result?.error || `Server error: ${response.status}`);
+      }
+      setScoreResult(result);
+      await refetch();
+      setShowResults(true);
+      toast.success('Your QieScore is ready!');
+
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to get score';
+
+      const friendlyMessage = message.includes('once per day')
+        ? 'You can only refresh your score once per day'
+        : message.includes('30 days')
+        ? 'Wallet must be at least 30 days old to get a QieScore'
+        : message.includes('maintenance')
+        ? 'QieScore is temporarily paused for maintenance'
+        : message.includes('5 transactions')
+        ? 'Wallet needs at least 5 transactions to get a QieScore'
+        : message;
+
+      toast.error(friendlyMessage);
+    } finally {
+      setAnalyzing(false);
+    }
+>>>>>>> 6b1edb42dc375f235193a1c5205adc4f08d8d923
   };
 
-  const score = scoreData?.totalScore || 0;
-
-  // If already has score data, show results immediately
-  if (scoreData && !analyzing && !showResults) {
-    setShowResults(true);
-  }
+  const score = scoreResult?.score || scoreData?.totalScore || 0;
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {}
       <div className="text-center">
         <h1 className="text-2xl font-bold text-white">Request AI Credit Score</h1>
         <p className="text-sm text-gray-500 mt-1">
-          Our AI will analyze your on-chain history to generate your QieScore
+          Our AI analyzes your on-chain history to generate your FICO-style QieScore (300-850)
         </p>
       </div>
 
-      {/* Analysis Animation */}
+      {}
       {analyzing && (
         <Card className="border-qie-border bg-qie-card">
           <CardContent className="p-8">
             <div className="flex flex-col items-center gap-6">
-              {/* AI Brain Animation */}
               <div className="relative">
                 <div className="absolute inset-0 animate-pulse rounded-full bg-qie-primary/20 blur-xl" />
                 <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-qie-primary to-qie-secondary">
                   <Brain className="h-12 w-12 text-qie-dark animate-pulse" />
                 </div>
               </div>
-
-              {/* Progress */}
               <div className="w-full max-w-md space-y-2">
                 <Progress
                   value={((currentStep + 1) / analysisSteps.length) * 100}
@@ -97,14 +146,18 @@ export function Score() {
                   {analysisSteps[currentStep]}
                 </p>
               </div>
-
-              {/* Step Indicators */}
               <div className="flex gap-2">
                 {analysisSteps.map((_, i) => (
                   <div
                     key={i}
+<<<<<<< HEAD
                     className={`h-2 w-2 rounded-full transition-all ${i <= currentStep ? 'bg-qie-primary w-4' : 'bg-gray-700'
                       }`}
+=======
+                    className={`h-2 rounded-full transition-all ${
+                      i <= currentStep ? 'bg-qie-primary w-4' : 'bg-gray-700 w-2'
+                    }`}
+>>>>>>> 6b1edb42dc375f235193a1c5205adc4f08d8d923
                   />
                 ))}
               </div>
@@ -113,7 +166,7 @@ export function Score() {
         </Card>
       )}
 
-      {/* Request Button */}
+      {}
       {!analyzing && !showResults && (
         <Card className="border-qie-border bg-qie-card">
           <CardContent className="p-8 text-center">
@@ -124,13 +177,18 @@ export function Score() {
               Ready to Generate Your Score
             </h3>
             <p className="mb-6 text-gray-400 max-w-md mx-auto">
+<<<<<<< HEAD
               This process analyzes your transaction history, wallet age, staking
               positions, and more. It takes about 30 seconds.
+=======
+              This process analyzes your transaction history, wallet age,
+              on-chain interactions, and balance. Takes about 30 seconds.
+>>>>>>> 6b1edb42dc375f235193a1c5205adc4f08d8d923
             </p>
             <Button
-              size="xl"
+              size="lg"
               onClick={handleRequestScore}
-              className="bg-qie-primary text-qie-dark font-bold hover:bg-qie-primary/90 glow-primary"
+              className="bg-qie-primary text-qie-dark font-bold hover:bg-qie-primary/90"
             >
               Start Analysis
               <ArrowRight className="h-5 w-5 ml-2" />
@@ -139,39 +197,78 @@ export function Score() {
         </Card>
       )}
 
-      {/* Results */}
-      {showResults && !analyzing && (
+      {}
+      {showResults && !analyzing && scoreResult && (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          {/* Success Banner */}
+
+          {}
           <Card className="border-green-500/30 bg-green-500/10">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
                 <CheckCircle2 className="h-6 w-6 text-green-500" />
                 <div>
-                  <p className="font-semibold text-green-400">Analysis Complete</p>
+                  <p className="font-semibold text-green-400">
+                    {scoreResult.isNewMint ? 'QieScore NFT Minted!' : 'Score Refreshed!'}
+                  </p>
                   <p className="text-sm text-green-300/70">
-                    Your QieScore has been calculated based on on-chain data
+                    Your QieScore has been calculated and recorded on QIE testnet
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Results Grid */}
+          {}
+          {scoreResult.summary && (
+            <Card className="border-qie-border bg-qie-card">
+              <CardContent className="p-6 space-y-3">
+                <p className="text-gray-300">{scoreResult.summary}</p>
+                {scoreResult.recommendation && (
+                  <div className="p-3 rounded-lg bg-qie-primary/10 border border-qie-primary/20">
+                    <p className="text-sm text-qie-primary">
+                      💡 {scoreResult.recommendation}
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {}
           <div className="grid gap-6 lg:grid-cols-3">
             <div className="space-y-6">
+<<<<<<< HEAD
               <ScoreCard
                 score={score}
                 isLoading={isLoading}
                 size="lg"
               />
+=======
+              <ScoreCard score={score} isLoading={isLoading} size="lg" />
+
+              {}
+              {scoreResult.txHash && (
+                <Card className="border-qie-border bg-qie-card">
+                  <CardContent className="p-4">
+                    <p className="text-xs text-gray-500 mb-1">Transaction Hash</p>
+                    <a
+                      href={`${getExplorerUrl(chainId)}/tx/${scoreResult.txHash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-qie-primary hover:underline break-all"
+                    >
+                      {scoreResult.txHash}
+                    </a>
+                  </CardContent>
+                </Card>
+              )}
+>>>>>>> 6b1edb42dc375f235193a1c5205adc4f08d8d923
 
               <Card className="border-qie-border bg-qie-card">
                 <CardHeader>
                   <CardTitle className="text-base text-white">Next Steps</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <MintButton className="w-full" />
                   <Button
                     variant="outline"
                     className="w-full border-qie-border hover:bg-qie-primary/10"
@@ -179,17 +276,32 @@ export function Score() {
                   >
                     View Full Dashboard
                   </Button>
+                  <Button
+                    className="w-full bg-qie-primary text-qie-dark font-bold hover:bg-qie-primary/90"
+                    onClick={() =>
+                      window.open(
+                        `https://www.borrow.qie.digital?wallet=${address}`,
+                        '_blank'
+                      )
+                    }
+                  >
+                    Go to QieLend
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </Button>
                 </CardContent>
               </Card>
             </div>
 
             <div className="lg:col-span-2 space-y-6">
               <FactorBreakdown
-                factors={scoreData?.factors}
-                isLoading={isLoading}
+                factors={scoreResult.factors}
+                isLoading={false}
                 chartType="radar"
               />
+<<<<<<< HEAD
 
+=======
+>>>>>>> 6b1edb42dc375f235193a1c5205adc4f08d8d923
               <ScoreHistory
                 history={scoreData?.history}
                 isLoading={isLoading}

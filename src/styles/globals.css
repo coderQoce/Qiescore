@@ -64,7 +64,7 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-/* Score animations */
+
 @keyframes score-pulse {
   0%, 100% {
     transform: scale(1);
@@ -78,7 +78,7 @@ h1, h2, h3, h4, h5, h6 {
   animation: score-pulse 2s ease-in-out infinite;
 }
 
-/* Loading shimmer */
+
 .shimmer {
   background: linear-gradient(
     90deg,
@@ -90,7 +90,7 @@ h1, h2, h3, h4, h5, h6 {
   animation: shimmer 1.5s infinite;
 }
 
-/* RainbowKit custom styling */
+
 [data-rk] {
   --rk-colors-accentColor: #00D084;
   --rk-colors-accentColorForeground: #0A0A0F;
@@ -104,7 +104,7 @@ h1, h2, h3, h4, h5, h6 {
   --rk-colors-profileActionHover: #2A2A3E;
 }
 
-/* Custom scrollbar */
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;

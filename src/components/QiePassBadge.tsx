@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { useQiePass } from '@/hooks/useQieScore';
-import { Shield, ShieldCheck, ShieldAlert, Loader2 } from 'lucide-react';
+import { ShieldCheck, ShieldAlert, Loader2 } from 'lucide-react';
 import type { Address } from 'viem';
 
 interface QiePassBadgeProps {

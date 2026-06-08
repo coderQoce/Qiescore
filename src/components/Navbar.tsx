@@ -17,7 +17,7 @@ export function Navbar() {
     <header className="sticky top-0 z-50 border-b border-qie-border bg-qie-dark/80 backdrop-blur-xl">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
-          {/* Logo */}
+          {}
           <Link to="/" className="flex items-center gap-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-qie-primary to-qie-secondary">
               <Activity className="h-6 w-6 text-qie-dark" />
@@ -27,7 +27,7 @@ export function Navbar() {
             </span>
           </Link>
 
-          {/* Navigation */}
+          {}
           <nav className="hidden md:flex items-center gap-1">
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -50,7 +50,7 @@ export function Navbar() {
             })}
           </nav>
 
-          {/* Connect Wallet */}
+          {}
           <ConnectButton
             showBalance={false}
             chainStatus="icon"
@@ -59,7 +59,7 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Navigation */}
+      {}
       <nav className="md:hidden border-t border-qie-border">
         <div className="flex justify-around py-2">
           {navItems.map((item) => {

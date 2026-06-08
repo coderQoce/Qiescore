@@ -5,4 +5,4 @@ export { ScoreHistory } from './ScoreHistory';
 export { ProtocolLookup } from './ProtocolLookup';
 export { QiePassBadge } from './QiePassBadge';
 export { MintButton } from './MintButton';
-export { BorrowCTA } from './BorrowCTA';
+

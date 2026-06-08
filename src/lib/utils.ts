@@ -1,3 +1,4 @@
+
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -19,28 +20,28 @@ export function formatNumber(num: number, decimals = 2): string {
 
 export function formatScore(score: number): { grade: string; color: string; label: string } {
   if (score >= 800) {
-    return { grade: "Excellent", color: "#00D084", label: "Low Risk" }
-  } else if (score >= 650) {
-    return { grade: "Good", color: "#00A8E8", label: "Low-Medium Risk" }
-  } else if (score >= 500) {
-    return { grade: "Fair", color: "#F59E0B", label: "Medium Risk" }
-  } else if (score >= 350) {
-    return { grade: "Poor", color: "#EF4444", label: "High Risk" }
+    return { grade: "Exceptional", color: "#00D084", label: "Low Risk" }
+  } else if (score >= 740) {
+    return { grade: "Very Good", color: "#00A8E8", label: "Low-Medium Risk" }
+  } else if (score >= 670) {
+    return { grade: "Good", color: "#7B2CBF", label: "Medium Risk" }
+  } else if (score >= 580) {
+    return { grade: "Fair", color: "#F59E0B", label: "Medium-High Risk" }
   }
-  return { grade: "Very Poor", color: "#DC2626", label: "Very High Risk" }
+  return { grade: "Poor", color: "#EF4444", label: "High Risk" }
 }
 
 export function getRiskLevel(score: number): { level: string; color: string; apr: string } {
   if (score >= 800) {
     return { level: "Minimal", color: "#00D084", apr: "3.5% - 6.5%" }
-  } else if (score >= 650) {
+  } else if (score >= 740) {
     return { level: "Low", color: "#00A8E8", apr: "6.5% - 10%" }
-  } else if (score >= 500) {
-    return { level: "Moderate", color: "#F59E0B", apr: "10% - 15%" }
-  } else if (score >= 350) {
-    return { level: "High", color: "#EF4444", apr: "15% - 25%" }
+  } else if (score >= 670) {
+    return { level: "Moderate", color: "#7B2CBF", apr: "10% - 15%" }
+  } else if (score >= 580) {
+    return { level: "Medium-High", color: "#F59E0B", apr: "15% - 20%" }
   }
-  return { level: "Very High", color: "#DC2626", apr: "25%+" }
+  return { level: "High", color: "#EF4444", apr: "20% - 25%" }
 }
 
 export function debounce<T extends (...args: unknown[]) => unknown>(

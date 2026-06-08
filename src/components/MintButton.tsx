@@ -1,3 +1,4 @@
+
 import { Button } from '@/components/ui/button';
 import { useMintScore } from '@/hooks/useMintScore';
 import { Loader2, Award, CheckCircle2 } from 'lucide-react';
@@ -19,7 +20,7 @@ export function MintButton({ className, size = 'default' }: MintButtonProps) {
         className={`border-green-500/50 text-green-500 ${className}`}
       >
         <CheckCircle2 className="h-4 w-4 mr-2" />
-        NFT Minted
+        Score Minted
       </Button>
     );
   }
@@ -28,19 +29,18 @@ export function MintButton({ className, size = 'default' }: MintButtonProps) {
     <Button
       onClick={mint}
       disabled={isPending}
-      variant="qie"
+      className={`bg-qie-primary text-qie-dark font-bold hover:bg-qie-primary/90 ${className}`}
       size={size}
-      className={className}
     >
       {isPending ? (
         <>
           <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          Minting...
+          Getting Score...
         </>
       ) : (
         <>
           <Award className="h-4 w-4 mr-2" />
-          Mint Soulbound NFT
+          Get My QieScore
         </>
       )}
     </Button>

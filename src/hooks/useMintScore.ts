@@ -1,96 +1,110 @@
-import { useAccount, useWriteContract, useWaitForTransactionReceipt, useChainId } from 'wagmi';
-import { SCORE_NFT_ABI } from '@/lib/abis';
-import { getContracts } from '@/lib/wagmi';
-import { toast } from 'sonner';
-import { useEffect } from 'react';
-import type { Address } from 'viem';
 
-// Hook to mint Soulbound Score NFT
+import { useAccount, useReadContract, useChainId } from "wagmi";
+import { SCORE_NFT_ABI } from "@/lib/abis";
+import { getContracts } from "@/lib/wagmi";
+import { useState } from "react";
+import { toast } from "sonner";
+import type { Address } from "viem";
+import { getExplorerUrl } from "@/lib/wagmi";
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+
+
 export function useMintScore() {
-  const { address: connectedAddress } = useAccount();
   const chainId = useChainId();
-  const contracts = getContracts(chainId || 8428);
-
-  const {
-    data: hash,
-    error: writeError,
-    isPending,
-    writeContract,
-    reset,
-  } = useWriteContract();
-
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
-    hash,
-  });
+  const { address } = useAccount();
+  const [isPending, setIsPending] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [txHash, setTxHash] = useState<string | null>(null);
 
   const mint = async () => {
-    if (!connectedAddress) {
-      toast.error('Please connect your wallet first');
+    if (!address) {
+      toast.error("Please connect your wallet first");
       return;
     }
 
+    setIsPending(true);
+    setIsSuccess(false);
+
     try {
-      toast.loading('Minting your QieScore NFT...', { id: 'mint-score' });
+      toast.loading("Requesting your QieScore...", { id: "mint-score" });
 
-      writeContract({
-        address: contracts.scoreNFT as Address,
-        abi: SCORE_NFT_ABI,
-        functionName: 'mintScore',
+      const response = await fetch(`${BACKEND_URL}/score/request`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wallet: address }),
       });
-    } catch (error) {
-      console.error('Mint error:', error);
-      toast.error('Failed to mint NFT', { id: 'mint-score' });
-      reset();
-    }
-  };
 
-  useEffect(() => {
-    if (isSuccess && hash) {
-      toast.success('QieScore NFT Minted successfully!', {
-        id: 'mint-score',
+      let result;
+      try {
+        result = await response.json();
+      } catch {
+        throw new Error(`Server error: ${response.status}`);
+      }
+      if (!response.ok) {
+        throw new Error(result?.error || `Server error: ${response.status}`);
+      }
+
+      setTxHash(result.txHash);
+      setIsSuccess(true);
+
+      toast.success(`QieScore: ${result.score} — ${result.grade}!`, {
+        id: "mint-score",
         duration: 5000,
         action: {
-          label: 'View on Explorer',
-          onClick: () => window.open(`https://mainnet.qiblockchain.online/tx/${hash}`, '_blank'),
+          label: "View on Explorer",
+          onClick: () =>
+            window.open(`${getExplorerUrl(chainId)}/tx/${txHash}`, "_blank"),
         },
       });
-    }
-  }, [isSuccess, hash]);
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Failed to get score";
 
-  useEffect(() => {
-    if (writeError) {
-      const message = writeError.message.includes('already minted')
-        ? 'You already have a QieScore NFT'
-        : writeError.message.includes('rejected')
-          ? 'Transaction rejected'
-          : 'Failed to mint NFT';
+      const friendlyMessage = message.includes("once per day")
+        ? "You can only refresh your score once per day"
+        : message.includes("30 days")
+          ? "Wallet must be at least 30 days old to get a QieScore"
+          : message.includes("maintenance")
+            ? "QieScore is temporarily paused for maintenance"
+            : message.includes("5 transactions")
+              ? "Wallet needs at least 5 transactions to get a QieScore"
+              : message;
 
-      toast.error(message, { id: 'mint-score' });
+      toast.error(friendlyMessage, { id: "mint-score" });
+    } finally {
+      setIsPending(false);
     }
-  }, [writeError]);
+  };
 
   return {
     mint,
-    isPending: isPending || isConfirming,
+    isPending,
     isSuccess,
-    hash,
-    reset,
+    txHash,
   };
 }
 
-// Hook to check if user has already minted
+
 export function useHasMinted(address?: Address) {
   const { address: connectedAddress } = useAccount();
   const chainId = useChainId();
   const targetAddress = address || connectedAddress;
-  const contracts = getContracts(chainId || 8428);
+  const contracts = getContracts(chainId || 1983);
 
-  const { data: hasMinted, isLoading } = useWriteContract();
+  const { data: hasMinted, isLoading } = useReadContract({
+    address: contracts.scoreNFT as Address,
+    abi: SCORE_NFT_ABI,
+    functionName: "hasMinted",
+    args: targetAddress ? [targetAddress] : undefined,
+    query: {
+      enabled: !!targetAddress,
+      staleTime: 30000,
+    },
+  });
 
-  // Note: This should actually be a read contract call, here's the proper implementation
   return {
-    hasMinted: false, // Placeholder - actual implementation needs useReadContract
-    tokenId: null,
+    hasMinted: (hasMinted as boolean) ?? false,
     isLoading,
   };
 }

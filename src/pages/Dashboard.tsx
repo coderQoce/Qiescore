@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useState } from 'react';
 import { useAccount } from 'wagmi';
 import { Navigate } from 'react-router-dom';
@@ -8,6 +9,21 @@ import { formatScore, formatAddress } from '@/lib/utils';
 import { calculateScore } from '@/lib/api';
 import { Wallet, TrendingUp, Zap, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
+=======
+
+import { useState } from "react";
+import { useAccount } from "wagmi";
+import { Navigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScoreCard, FactorBreakdown, ScoreHistory } from "@/components";
+import { useQieScore } from "@/hooks/useQieScore";
+import { formatScore, formatAddress, getRiskLevel } from "@/lib/utils";
+import { Wallet, TrendingUp, Zap, ArrowRight, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+>>>>>>> 6b1edb42dc375f235193a1c5205adc4f08d8d923
 
 interface ScoreData {
   totalScore: number;
@@ -25,21 +41,25 @@ interface ScoreData {
 
 export function Dashboard() {
   const { address, isConnected } = useAccount();
+<<<<<<< HEAD
   const [scoreData, setScoreData] = useState<ScoreData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [scoreRequested, setScoreRequested] = useState(false);
+=======
+  const { data: scoreData, isLoading, refetch } = useQieScore();
+  const [isRequesting, setIsRequesting] = useState(false);
+>>>>>>> 6b1edb42dc375f235193a1c5205adc4f08d8d923
 
-  // Redirect to landing if not connected
   if (!isConnected) {
     return <Navigate to="/" replace />;
   }
 
-  const displayData = scoreData;
-  const displayAddress = address || '';
-  const score = displayData?.totalScore || 0;
+  const score = scoreData?.totalScore || 0;
   const { grade, color } = formatScore(score);
+  const risk = getRiskLevel(score);
 
   const handleRequestScore = async () => {
+<<<<<<< HEAD
     if (!address) {
       toast.error('Wallet address not found', { id: 'request' });
       return;
@@ -59,37 +79,85 @@ export function Dashboard() {
       toast.error('Failed to calculate score. Please try again.', { id: 'request', duration: 3000 });
     } finally {
       setIsLoading(false);
+=======
+    if (!address) return;
+
+    setIsRequesting(true);
+    toast.loading("Analyzing your on-chain history...", { id: "request" });
+
+    try {
+      const response = await fetch(`${BACKEND_URL}/score/request`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wallet: address }),
+      });
+
+      let result;
+      try {
+        result = await response.json();
+      } catch {
+        throw new Error(`Server error: ${response.status}`);
+      }
+      if (!response.ok) {
+        throw new Error(result?.error || `Server error: ${response.status}`);
+      }
+
+      await refetch();
+      toast.success(`Score: ${result.score} — ${result.grade}!`, {
+        id: "request",
+      });
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Failed to get score";
+      toast.error(message, { id: "request" });
+    } finally {
+      setIsRequesting(false);
+>>>>>>> 6b1edb42dc375f235193a1c5205adc4f08d8d923
     }
   };
 
-  const calculateBorrowingPower = () => {
-    if (score < 500) return { ltv: '50%', previous: '40%' };
-    if (score < 650) return { ltv: '66%', previous: '50%' };
-    if (score < 750) return { ltv: '75%', previous: '66%' };
-    return { ltv: '80%', previous: '75%' };
+  const getEligibilityMessage = () => {
+    if (score >= 800)
+      return {
+        message: "Eligible for lowest rates on QieLend",
+        color: "#00D084",
+      };
+    if (score >= 740)
+      return {
+        message: "Eligible for preferential rates on QieLend",
+        color: "#00A8E8",
+      };
+    if (score >= 670)
+      return {
+        message: "Eligible for standard rates on QieLend",
+        color: "#7B2CBF",
+      };
+    if (score >= 580)
+      return {
+        message: "Limited borrowing access on QieLend",
+        color: "#F59E0B",
+      };
+    return {
+      message: "Build your score to unlock borrowing on QieLend",
+      color: "#EF4444",
+    };
   };
 
-  const borrowPower = calculateBorrowingPower();
-
-  const handleBorrowClick = () => {
-    const qieLendUrl = `https://qielend.qiblockchain.online?wallet=${displayAddress}`;
-    window.open(qieLendUrl, '_blank');
-  };
+  const eligibility = getEligibilityMessage();
 
   return (
     <div className="space-y-8">
-      {/* Header */}
+      {}
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold text-white">Your Credit Score</h1>
         <p className="text-gray-400 flex items-center gap-2">
           <Wallet className="h-4 w-4" />
-          {formatAddress(displayAddress)}
-          {!isConnected && <span className="text-xs text-qie-primary">(Demo)</span>}
+          {formatAddress(address || "")}
         </p>
       </div>
 
-      {/* Request Score Section */}
-      {!scoreRequested ? (
+      {}
+      {!scoreData?.hasMinted ? (
         <Card className="border-qie-border bg-gradient-to-br from-qie-primary/10 to-qie-secondary/5">
           <CardContent className="p-8 text-center">
             <div className="space-y-4">
@@ -99,32 +167,34 @@ export function Dashboard() {
                 </div>
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-white mb-2">Ready to Get Your Score?</h2>
+                <h2 className="text-2xl font-bold text-white mb-2">
+                  Ready to Get Your Score?
+                </h2>
                 <p className="text-gray-400 max-w-md mx-auto">
-                  We'll analyze your on-chain behavior to calculate your QieScore and unlock borrowing power on QieLend.
+                  We'll analyze your on-chain behavior to calculate your
+                  QieScore using the FICO scoring model (300-850).
                 </p>
               </div>
               <Button
                 size="lg"
                 onClick={handleRequestScore}
-                disabled={isLoading}
-                className="bg-qie-primary text-qie-dark font-bold hover:bg-qie-primary/90 glow-primary"
+                disabled={isRequesting || isLoading}
+                className="bg-qie-primary text-qie-dark font-bold hover:bg-qie-primary/90"
               >
-                {isLoading ? 'Analyzing...' : 'Request Your Credit Score'}
+                {isRequesting ? "Analyzing..." : "Request Your Credit Score"}
               </Button>
             </div>
           </CardContent>
         </Card>
       ) : (
         <>
-          {/* Score Display - FICO Style */}
+          {/* Score Display */}
           <div className="grid gap-6 lg:grid-cols-3">
             {/* Main Score Card */}
             <div className="lg:col-span-2">
               <Card className="border-qie-border bg-qie-card">
                 <CardContent className="p-8">
                   <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-                    {/* Score Circle */}
                     <div className="flex-shrink-0">
                       <ScoreCard
                         score={score}
@@ -132,17 +202,18 @@ export function Dashboard() {
                         size="lg"
                       />
                     </div>
-
-                    {/* Score Details */}
-                    <div className="flex-1 space-y-6">
+                    <div className="flex-1 space-y-4">
                       <div>
-                        <p className="text-sm text-gray-400 uppercase tracking-wider mb-2">Your Score</p>
+                        <p className="text-sm text-gray-400 uppercase tracking-wider mb-2">
+                          Your QieScore
+                        </p>
                         <div className="flex items-baseline gap-2">
-                          <span className="text-5xl font-bold text-white">{score}</span>
-                          <span className="text-xl text-gray-500">/ 1000</span>
+                          <span className="text-5xl font-bold text-white">
+                            {score}
+                          </span>
+                          <span className="text-xl text-gray-500">/ 850</span>
                         </div>
                       </div>
-
                       <div className="space-y-3">
                         <div className="flex items-center justify-between p-3 rounded-lg bg-qie-dark/50 border border-qie-border">
                           <span className="text-gray-400">Grade</span>
@@ -152,79 +223,118 @@ export function Dashboard() {
                         </div>
                         <div className="flex items-center justify-between p-3 rounded-lg bg-qie-dark/50 border border-qie-border">
                           <span className="text-gray-400">Risk Level</span>
-                          <span className="text-lg font-bold" style={{ color }}>
-                            {formatScore(score).label}
+                          <span
+                            className="text-lg font-bold"
+                            style={{ color: risk.color }}
+                          >
+                            {risk.level}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between p-3 rounded-lg bg-qie-dark/50 border border-qie-border">
+                          <span className="text-gray-400">Est. APR</span>
+                          <span className="text-lg font-bold text-qie-primary">
+                            {risk.apr}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between p-3 rounded-lg bg-qie-dark/50 border border-qie-border">
+                          <span className="text-gray-400">Refresh</span>
+                          <span
+                            className="text-sm font-medium"
+                            style={{
+                              color: scoreData?.canRefresh
+                                ? "#00D084"
+                                : "#F59E0B",
+                            }}
+                          >
+                            {scoreData?.canRefresh
+                              ? "Available now"
+                              : "Available tomorrow"}
                           </span>
                         </div>
                       </div>
+
+                      {/* Refresh Button */}
+                      {scoreData?.canRefresh && (
+                        <Button
+                          variant="outline"
+                          onClick={handleRequestScore}
+                          disabled={isRequesting}
+                          className="w-full border-qie-border hover:bg-qie-primary/10"
+                        >
+                          <RefreshCw className="h-4 w-4 mr-2" />
+                          {isRequesting ? "Refreshing..." : "Refresh Score"}
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Borrowing Power Card */}
+            {/* QieLend Eligibility Card */}
             <Card className="border-qie-border bg-qie-card">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
                   <TrendingUp className="h-5 w-5 text-qie-primary" />
-                  Borrowing Power
+                  QieLend Access
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                <div
+                  className="p-4 rounded-lg border"
+                  style={{
+                    backgroundColor: `${eligibility.color}10`,
+                    borderColor: `${eligibility.color}30`,
+                  }}
+                >
+                  <p
+                    className="text-sm font-medium"
+                    style={{ color: eligibility.color }}
+                  >
+                    {eligibility.message}
+                  </p>
+                </div>
                 <div className="space-y-2">
-                  <p className="text-sm text-gray-400">Your LTV (Loan-to-Value)</p>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-bold text-qie-primary">{borrowPower.ltv}</span>
-                    <span className="text-sm text-gray-500">
-                      (was {borrowPower.previous})
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-400">Est. APR Range</span>
+                    <span className="font-medium text-white">{risk.apr}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-400">Risk Profile</span>
+                    <span className="font-medium" style={{ color: risk.color }}>
+                      {risk.level}
                     </span>
                   </div>
                 </div>
-                <div className="p-3 rounded-lg bg-qie-primary/10 border border-qie-primary/20">
-                  <p className="text-sm text-gray-300">
-                    You can now borrow with <span className="font-bold text-qie-primary">{borrowPower.ltv} LTV</span> instead of <span className="font-bold">{borrowPower.previous}</span>
-                  </p>
-                </div>
+                <Button
+                  className="w-full bg-qie-primary text-qie-dark font-bold hover:bg-qie-primary/90"
+                  onClick={() =>
+                    window.open(
+                      `https://www.borrow.qie.digital?wallet=${address}`,
+                      "_blank",
+                    )
+                  }
+                >
+                  Go to QieLend
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
               </CardContent>
             </Card>
           </div>
 
           {/* Score History */}
           <ScoreHistory
-            history={displayData?.history}
+            history={scoreData?.history}
             isLoading={isLoading}
             currentScore={score}
           />
 
           {/* Factor Breakdown */}
           <FactorBreakdown
-            factors={displayData?.factors}
+            factors={scoreData?.factors}
             isLoading={isLoading}
             chartType="bar"
           />
-
-          {/* Prominent Borrow Button */}
-          <Card className="border-qie-primary/50 bg-gradient-to-r from-qie-primary/20 to-qie-secondary/10 overflow-hidden">
-            <CardContent className="p-8">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-                <div className="space-y-2">
-                  <h3 className="text-2xl font-bold text-white">Ready to Borrow?</h3>
-                  <p className="text-gray-400">
-                    Use your QieScore to unlock better rates and higher borrowing limits on QieLend
-                  </p>
-                </div>
-                <Button
-                  size="lg"
-                  onClick={handleBorrowClick}
-                  className="bg-qie-primary text-qie-dark font-bold hover:bg-qie-primary/90 glow-primary whitespace-nowrap"
-                >
-                  Borrow on QieLend with your score
-                  <ArrowRight className="h-5 w-5 ml-2" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
         </>
       )}
     </div>
