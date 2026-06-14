@@ -3,7 +3,7 @@ import { useAccount } from "wagmi";
 import { Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScoreCard, FactorBreakdown, ScoreHistory } from "@/components";
+import { ScoreCard, ScoreHistory } from "@/components";
 import { useQieScore } from "@/hooks/useQieScore";
 import { formatScore, formatAddress, getRiskLevel } from "@/lib/utils";
 import { Wallet, TrendingUp, Zap, ArrowRight, RefreshCw, AlertCircle, Clock, History } from "lucide-react";
@@ -11,22 +11,64 @@ import { toast } from "sonner";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://qiescore-backend.onrender.com";
 
+// Match the exact types expected by the components
+interface ScoreRecord {
+  timestamp: number;
+  score: number;
+  grade?: string;
+}
+
+interface ScoreData {
+  hasMinted: boolean;
+  totalScore: number;
+  canRefresh: boolean;
+  history: ScoreRecord[];
+  grade?: string;
+}
+
 export function Dashboard() {
   const { address, isConnected } = useAccount();
   const { data: hookScoreData, isLoading, refetch } = useQieScore();
   const [isRequesting, setIsRequesting] = useState(false);
-  const [localScoreData, setLocalScoreData] = useState(null);
-  const [requirementError, setRequirementError] = useState(null); // Store requirement error
+  const [localScoreData, setLocalScoreData] = useState<ScoreData | null>(null);
+  const [requirementError, setRequirementError] = useState<string | null>(null);
 
-  // Merge hook data with local data
-  const displayData = localScoreData || hookScoreData;
+  // Helper function to normalize history to array of ScoreRecord
+  const normalizeHistory = (history: any): ScoreRecord[] => {
+    if (!history) return [];
+    if (Array.isArray(history)) {
+      return history.map(entry => ({
+        timestamp: entry.timestamp || entry.date || Date.now(),
+        score: entry.score || 0,
+        grade: entry.grade
+      }));
+    }
+    return [];
+  };
 
-  // Debug logging to see what the backend returns
+  // Merge hook data with local data and normalize
+  const getNormalizedDisplayData = (): ScoreData | null => {
+    const sourceData = localScoreData || hookScoreData;
+    if (!sourceData) return null;
+    
+    return {
+      hasMinted: sourceData.hasMinted ?? false,
+      totalScore: sourceData.totalScore || 0,
+      canRefresh: sourceData.canRefresh ?? false,
+      history: normalizeHistory(sourceData.history),
+      grade: sourceData.grade,
+    };
+  };
+
+  const displayData = getNormalizedDisplayData();
+
+  // Debug logging
   useEffect(() => {
     if (hookScoreData) {
       console.log("Hook score data from backend:", hookScoreData);
       console.log("Has minted:", hookScoreData.hasMinted);
       console.log("Total score:", hookScoreData.totalScore);
+      console.log("History type:", typeof hookScoreData.history, hookScoreData.history);
     }
   }, [hookScoreData]);
 
@@ -42,7 +84,7 @@ export function Dashboard() {
     if (!address) return;
 
     setIsRequesting(true);
-    setRequirementError(null); // Clear previous errors
+    setRequirementError(null);
     toast.loading("Analyzing your on-chain history...", { id: "request" });
 
     try {
@@ -59,11 +101,9 @@ export function Dashboard() {
         throw new Error(`Server error: ${response.status}`);
       }
       
-      // Check for requirement error message
       if (!response.ok || result.error) {
         const errorMessage = result.error || result.message || `Server error: ${response.status}`;
         
-        // Check if it's the specific wallet requirement error
         if (errorMessage.includes("30 days") || errorMessage.includes("5 transaction")) {
           setRequirementError(errorMessage);
           toast.error(errorMessage, { id: "request", duration: 5000 });
@@ -75,15 +115,13 @@ export function Dashboard() {
 
       console.log("Score request response:", result);
 
-      // Transform the backend response to match what your UI expects
-      const transformedData = {
+      // Transform and normalize the data
+      const transformedData: ScoreData = {
         hasMinted: result.hasMinted ?? true,
         totalScore: result.totalScore || result.score || 0,
         canRefresh: result.canRefresh ?? false,
-        factors: result.factors || [],
-        history: result.history || [],
+        history: normalizeHistory(result.history),
         grade: result.grade,
-        ...result
       };
 
       setLocalScoreData(transformedData);
@@ -141,7 +179,7 @@ export function Dashboard() {
 
   const eligibility = getEligibilityMessage();
 
-  // Show loading state while checking for existing score
+  // Show loading state
   if (isLoading && !displayData) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -221,7 +259,6 @@ export function Dashboard() {
                   </p>
                 </div>
                 
-                {/* Show requirements if not met */}
                 {!requirementError && (
                   <div className="flex justify-center gap-6 text-sm text-gray-400 py-2">
                     <div className="flex items-center gap-1">
@@ -249,7 +286,7 @@ export function Dashboard() {
         </>
       ) : (
         <>
-          {/* Score Display - Same as before */}
+          {/* Score Display */}
           <div className="grid gap-6 lg:grid-cols-3">
             {/* Main Score Card */}
             <div className="lg:col-span-2">
@@ -392,19 +429,12 @@ export function Dashboard() {
             </Card>
           </div>
 
+          {/* Score History Section */}
           {score > 0 && displayData?.history && displayData.history.length > 0 && (
             <ScoreHistory
-              history={displayData?.history}
+              history={displayData.history}
               isLoading={isLoading && !localScoreData}
               currentScore={score}
-            />
-          )}
-
-          {score > 0 && displayData?.factors && displayData.factors.length > 0 && (
-            <FactorBreakdown
-              factors={displayData?.factors}
-              isLoading={isLoading && !localScoreData}
-              chartType="bar"
             />
           )}
         </>
