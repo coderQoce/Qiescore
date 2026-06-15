@@ -55,6 +55,12 @@ export function useQieScore(address?: Address) {
     },
   });
 
+  console.log('Debug:', { 
+    targetAddress, 
+    contractAddress: contracts.scoreNFT, 
+    hasMintedData, 
+    isMintedLoading 
+});
   
   const {
     data: scoreData,
