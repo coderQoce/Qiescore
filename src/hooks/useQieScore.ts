@@ -54,13 +54,6 @@ export function useQieScore(address?: Address) {
       staleTime: 30000,
     },
   });
-
-  console.log('Debug:', { 
-    targetAddress, 
-    contractAddress: contracts.scoreNFT, 
-    hasMintedData, 
-    isMintedLoading 
-});
   
   const {
     data: scoreData,
